@@ -1,12 +1,3 @@
-require 'net/http'
-require 'open-uri'
-require 'httparty'
-require 'json'
-require 'bundler'
-require 'openssl'
-OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
-require 'pry'
-
 class Api
  
    #call API to gather a list of all NBA teams

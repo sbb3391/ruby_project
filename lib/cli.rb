@@ -3,7 +3,7 @@ class Cli
     attr_accessor :team_selection, :year, :input3, :input4
 
     puts ""
-    puts "Welcome to your NBA resource. Where you can get game results for your favorite NBA team!" 
+    puts "Hi Kellen - Welcome to your NBA resource. Where you can get game results for your favorite NBA team!" 
     
     def start
         Api.new.get_teams
