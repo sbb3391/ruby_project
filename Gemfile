@@ -4,7 +4,6 @@ source "https://rubygems.org"
 
 gem 'pry'
 gem 'rspec'
-gem 'pry'
 gem 'json'
 gem 'httparty'
 gem 'awesome_print'
