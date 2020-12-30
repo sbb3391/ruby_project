@@ -1,11 +1,16 @@
+require 'pry'
+
 class Cli 
 
-    attr_accessor :team_selection, :year, :input3, :input4
-
-    puts ""
-    puts "Hi Kellen - Welcome to your NBA resource. Where you can get game results for your favorite NBA team!" 
+    attr_accessor :user, :index, :team_selection, :year, :input3, :input4
+    
+    
     
     def start
+        system("clear")
+        puts ""
+        puts "Welcome to your NBA resource. Where you can get game results for your favorite NBA team!"
+        sleep(1.5)
         Api.new.get_teams
         space
         menu
@@ -22,33 +27,99 @@ class Cli
     end
     
     def menu
-        input = ""
-        while input != "exit"
-            puts "--------- NBA Basketball Teams ---------"
-            space
-            show_teams
-            puts "What team would you like to see?"
-            input = gets.strip
-            index = input.to_i - 1
-            space
-            puts "You've selected the #{Team.all[index].full_name}, from the #{Team.all[index].division} Division of the #{Team.all[index].conference}ern Conference."
-            space
+        team_select
+            
+        get_year
+    
+    end
 
-            if index <= Team.all.size
-                puts "What year are you interested in?"
-                space
-                year = gets.strip
-                Api.new.game_info(year, input)
-                space
-                puts "type 'exit' to end this session, or any key to see another team's game data."
-                space
-                input = gets.strip
-                
-            end
+    def games_or_record
+        puts "Would you like to:"
+        puts "1) See overall team record in the #{@year} season"
+        puts "2) See individual game results for the #{@year} season"
+        puts "Please select your answer..."
+        space
+        input = gets.strip
+
+        case input
+        when "1"
+            space
+            year = @year
+            input = @team_selection
+            index = @index
+            team_full_name = Team.all[index].full_name
+            x = Api.new(input, team_full_name)
+            x.team_record(year, input)
+            sleep(3)
+            space
+            space
+            what_next
+        when "2"
+            year = @year
+            input = @team_selection
+            index = @index
+            team_full_name = Team.all[index].full_name
+            puts "Please wait while we get this data..."
+            space
+            x = Api.new(input, team_full_name)
+            x.game_info(year, input)
+            space
+            what_next
+        when !"1" || !"2"
+            puts "That is an incorrect response. Please try again"
+            games_or_record
         end
     end
 
+    def team_select
 
+        puts "--------- NBA Basketball Teams ---------"
+        space
+        show_teams
+        space
+        
+        puts "What team would you like to see?"
+        space
+        @team_selection = gets.strip
+        @index = @team_selection.to_i - 1
+        space
+        if @team_selection.to_i <= Team.all.size && @team_selection.to_i != 0
+            puts "--- You've selected the #{Team.all[index].full_name}, from the #{Team.all[index].division} Division of the #{Team.all[index].conference}ern Conference. ---"
+            space
+        else 
+            system("clear")
+            puts "Invalid selection. Please select a number between 1 and #{Team.all.size}"
+            sleep(3)
+            space
+            menu
+        end
+    end
+
+    def what_next
+        puts "What would you like to do next?"
+        puts "1) See data for a different season"
+        puts "2) Select a different team"
+        puts "3) Exit"
+        space
+
+        input = gets.strip
+
+        space
+
+        case input 
+        when "1"
+            system("clear")
+            get_year
+        when "2"
+            system("clear")
+            menu
+        when "3"
+            puts "Thank you for using your NBA resource. Have a great day!"
+        when !"1" && !"2" && !"3"
+            puts "sorry please input a selection between 1 and 3"
+            what_next
+        end
+    end
 
     def initial_options
 
@@ -99,6 +170,23 @@ class Cli
                 puts "Thank you for using your trusted NBA resource. Have a great day!"
             end
     end
+
+    def get_year
+        puts "What season are you interested in? Please select a season between 1970 and 2019"
+        space
+        @year = gets.strip
+        system("clear")
+
+        if @year.to_i >= 2020 || @year.to_i < 1970
+            puts "Invalid selection. Please select a season between 1970 and 2019"
+            sleep(4)
+            space
+            menu
+        end
+
+        games_or_record
+    end
+
     
 end
     

@@ -7,6 +7,7 @@ gem 'rspec'
 gem 'json'
 gem 'httparty'
 gem 'awesome_print'
+gem 'colorize'
 
 
 git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }

@@ -1,5 +1,7 @@
 require 'openssl'
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+require 'pry'
+require 'colorize'
 
 require 'bundler'
 Bundler.require

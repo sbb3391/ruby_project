@@ -4,7 +4,7 @@ Cli.new.start
 
 # binding.pry
 
-# a = Api.new.game_info(1999, 5)
+# a = Api.new.team_record(1999, 5)
 
 
 
