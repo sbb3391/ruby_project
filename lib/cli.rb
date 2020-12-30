@@ -181,7 +181,7 @@ class Cli
             puts "Invalid selection. Please select a season between 1970 and 2019"
             sleep(4)
             space
-            menu
+            get_year
         end
 
         games_or_record

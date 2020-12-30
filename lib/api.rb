@@ -83,6 +83,8 @@ class Api
          self.chosen_team_nickname = self.chosen_team_full_name.split(" ").last
       end
 
+      display_set = 20
+
       x.each do |key, value|
          if value["home_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
             puts "On #{value["date"]} the #{self.chosen_team_nickname} defeated the visiting #{value["visitor_team"]} by a score of #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:green)
@@ -104,13 +106,13 @@ class Api
       x = get_games(year, input).sort.to_h
 
       x.each do |key, value|
-         if value["home_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
+         if value["home_team"] == @chosen_team_nickname && value["home_team_score"] > value["visitor_team_score"]
             @wins += 1
-         elsif value["home_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
+         elsif value["home_team"] == @chosen_team_nickname && value["home_team_score"] < value["visitor_team_score"]
             @losses += 1
-         elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
+         elsif value["visitor_team"] == @chosen_team_nickname && value["home_team_score"] > value["visitor_team_score"]
             @losses += 1
-         elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
+         elsif value["visitor_team"] == @chosen_team_nickname && value["home_team_score"] < value["visitor_team_score"]
             @wins += 1
          end
 
