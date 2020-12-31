@@ -16,11 +16,7 @@ class Cli
         menu
     end
     
-    def show_teams
-        Team.all.each_with_index do |i, index|
-            puts "#{index+1}) #{i.full_name}"
-        end
-    end
+   
     
     def space
         puts ""
@@ -49,6 +45,12 @@ class Cli
         when !"1" || !"2"
             puts "That is an incorrect response. Please try again"
             games_or_record
+        end
+    end
+
+    def show_teams
+        Team.all.each_with_index do |i, index|
+            puts "#{index+1}) #{i.full_name}"
         end
     end
 

@@ -79,6 +79,7 @@ class Api
    def game_info(year, input)
       x = get_games(year, input).sort.to_h
 
+      #determine if the team did not exist during the given year
       if x == {}
          puts "The #{self.chosen_team_full_name} did not play any games in #{year}."
       end
@@ -91,7 +92,7 @@ class Api
       x.each do |key, value|
          counter += 1
          if value["home_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
-            puts "#{value["date"]} -- #{value["visitor_team"]}: #{self.chosen_team_nickname} win #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:green)
+            puts "#{value["date"]} -- #{value["visitor_team"]}: #{self.chosen_team_nickname} win #{value["home_team_score"]} to #{value["visitor_team_score"]}.".green
             sleep(0.2)
          elsif value["home_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
             puts "#{value["date"]} -- #{value["visitor_team"]}: #{self.chosen_team_nickname} lose #{value["visitor_team_score"]} to #{value["home_team_score"]}.".colorize(:red)
