@@ -79,48 +79,69 @@ class Api
    def game_info(year, input)
       x = get_games(year, input).sort.to_h
 
+      if x == {}
+         puts "The #{self.chosen_team_full_name} did not play any games in #{year}."
+      end
+
       if self.chosen_team_full_name != nil
          self.chosen_team_nickname = self.chosen_team_full_name.split(" ").last
       end
 
-      display_set = 20
-
+      counter = 0
       x.each do |key, value|
+         counter += 1
          if value["home_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
-            puts "On #{value["date"]} the #{self.chosen_team_nickname} defeated the visiting #{value["visitor_team"]} by a score of #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:green)
+            puts "#{value["date"]} -- #{value["visitor_team"]}: #{self.chosen_team_nickname} win #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:green)
             sleep(0.2)
          elsif value["home_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
-            puts "On #{value["date"]} the #{self.chosen_team_nickname} were defeated by the visiting #{value["visitor_team"]} by a score of #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:red)
+            puts "#{value["date"]} -- #{value["visitor_team"]}: #{self.chosen_team_nickname} lose #{value["visitor_team_score"]} to #{value["home_team_score"]}.".colorize(:red)
             sleep(0.2)
          elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
-            puts "On #{value["date"]} the #{self.chosen_team_nickname} went on the road and were defeated by #{value["home_team"]} by a score of #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:red)
+            puts "#{value["date"]} -- @#{value["home_team"]}: #{self.chosen_team_nickname} lose  #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:red)
             sleep(0.2)
          elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
-            puts "On #{value["date"]} the #{self.chosen_team_nickname} went on the road and defeated the #{value["home_team"]} by a score of #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:green)
+            puts "#{value["date"]} -- @#{value["home_team"]}: #{self.chosen_team_nickname} win #{value["visitor_team_score"]} to #{value["home_team_score"]}.".colorize(:green)
             sleep(0.2)
          end
+         
+         if counter % 20 == 0
+            puts "Type 'n' if you do not want to see more games. Otherwise press 'Enter'"
+            input = gets.chomp 
+
+            if input == "n"
+               break
+            end
+
+         end
+
       end
    end
 
    def team_record(year, input)
       x = get_games(year, input).sort.to_h
 
-      x.each do |key, value|
-         if value["home_team"] == @chosen_team_nickname && value["home_team_score"] > value["visitor_team_score"]
-            @wins += 1
-         elsif value["home_team"] == @chosen_team_nickname && value["home_team_score"] < value["visitor_team_score"]
-            @losses += 1
-         elsif value["visitor_team"] == @chosen_team_nickname && value["home_team_score"] > value["visitor_team_score"]
-            @losses += 1
-         elsif value["visitor_team"] == @chosen_team_nickname && value["home_team_score"] < value["visitor_team_score"]
-            @wins += 1
-         end
+      if x == {}
+         puts "The #{self.chosen_team_full_name} did not play any games in the #{year}-#{year.to_i + 1} season."
+      else  
 
+         x.each do |key, value|
+            
+            if value["home_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
+               @wins += 1
+            elsif value["home_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
+               @losses += 1
+            elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
+               @losses += 1
+            elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
+               @wins += 1
+            end
+         end
+   
+         if self.chosen_team_full_name != nil
+            self.chosen_team_nickname = self.chosen_team_full_name.split(" ").last
+         end
+         puts "In #{year} the #{self.chosen_team_nickname} had a record of #{wins} wins and #{losses} losses."
       end
-      if self.chosen_team_full_name != nil
-         self.chosen_team_nickname = self.chosen_team_full_name.split(" ").last
-      end
-      puts "In #{year} the #{self.chosen_team_nickname} had a record of #{wins} wins and #{losses} losses."
    end
 
 end

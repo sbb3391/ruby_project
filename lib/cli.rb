@@ -2,7 +2,7 @@ require 'pry'
 
 class Cli 
 
-    attr_accessor :user, :index, :team_selection, :year, :input3, :input4
+    attr_accessor :user, :counter, :index, :team_selection, :team_nick_name, :year, :input3, :input4
     
     
     
@@ -35,36 +35,17 @@ class Cli
 
     def games_or_record
         puts "Would you like to:"
-        puts "1) See overall team record in the #{@year} season"
-        puts "2) See individual game results for the #{@year} season"
+        puts "1) See team record for the #{self.team_nick_name} in the #{@year}-#{@year.to_i + 1} season"
+        puts "2) See individual game results for #{self.team_nick_name} for the #{@year}-#{@year.to_i + 1} season"
         puts "Please select your answer..."
         space
         input = gets.strip
 
         case input
         when "1"
-            space
-            year = @year
-            input = @team_selection
-            index = @index
-            team_full_name = Team.all[index].full_name
-            x = Api.new(input, team_full_name)
-            x.team_record(year, input)
-            sleep(3)
-            space
-            space
-            what_next
+            get_record
         when "2"
-            year = @year
-            input = @team_selection
-            index = @index
-            team_full_name = Team.all[index].full_name
-            puts "Please wait while we get this data..."
-            space
-            x = Api.new(input, team_full_name)
-            x.game_info(year, input)
-            space
-            what_next
+            get_games
         when !"1" || !"2"
             puts "That is an incorrect response. Please try again"
             games_or_record
@@ -82,6 +63,9 @@ class Cli
         space
         @team_selection = gets.strip
         @index = @team_selection.to_i - 1
+        index = @index
+        @team_nick_name = Team.all[index].full_name.split(" ").last
+        
         space
         if @team_selection.to_i <= Team.all.size && @team_selection.to_i != 0
             puts "--- You've selected the #{Team.all[index].full_name}, from the #{Team.all[index].division} Division of the #{Team.all[index].conference}ern Conference. ---"
@@ -121,21 +105,6 @@ class Cli
         end
     end
 
-    def initial_options
-
-        initial_options_prompt
-            space
-        puts "--------- NBA Basketball Teams ---------"
-            space
-        Api.get_teams('https://www.balldontlie.io/api/v1/teams')
-            space
-        select_team
-            space
-        game_info
-            
-            
-    end
-        
     def select_team
         puts "Select the team number..."
             space
@@ -187,6 +156,50 @@ class Cli
         games_or_record
     end
 
+    def get_record
+        space
+            year = @year
+            input = @team_selection
+            index = @index
+            team_full_name = Team.all[index].full_name
+            x = Api.new(input, team_full_name)
+            x.team_record(year, input)
+            sleep(3)
+            space
+            space
+            puts "type 'y' if you would like to get #{team_full_name} game results for the #{year}-#{year.to_i + 1} season. Otherwise press enter."
+            space
+            x = gets.strip.downcase
+
+            if x == "y"
+                get_games
+            else
+                what_next
+            end
+        end
+
+        def get_games
+            space
+            year = @year
+            input = @team_selection
+            index = @index
+            team_full_name = Team.all[index].full_name
+            puts "Please wait while we get this data..."
+            space
+            x = Api.new(input, team_full_name)
+            x.game_info(year, input)
+            space
+            sleep(1)
+            puts "type 'y' if you would like to see the record for the #{team_full_name} for the #{year}-#{year.to_i + 1} season. Otherwise press enter."
+            space
+            x = gets.strip.downcase
+
+            if x == "y"
+                get_record
+            else
+                what_next
+            end
+        end
     
 end
     
