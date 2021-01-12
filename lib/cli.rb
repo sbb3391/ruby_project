@@ -42,7 +42,7 @@ class Cli
             get_record
         when "2"
             get_games
-        when !"1" || !"2"
+        else 
             puts "That is an incorrect response. Please try again"
             games_or_record
         end
@@ -66,10 +66,10 @@ class Cli
         @team_selection = gets.strip
         @index = @team_selection.to_i - 1
         index = @index
-        @team_nick_name = Team.all[index].full_name.split(" ").last
         
         space
         if @team_selection.to_i <= Team.all.size && @team_selection.to_i != 0
+            @team_nick_name = Team.all[index].full_name.split(" ").last
             puts "--- You've selected the #{Team.all[index].full_name}, from the #{Team.all[index].division} Division of the #{Team.all[index].conference}ern Conference. ---"
             space
         else 

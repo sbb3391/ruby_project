@@ -28,6 +28,7 @@ class Api
    def team_information(input)
       index = input - 1
       url = 'https://www.balldontlie.io/api/v1/teams'
+      binding.pry
       response = self.call_api(url)["data"][index]
       @chosen_team_full_name = response["full_name"]
       @chosen_team_nickname = @chosen_team_fullname.split(" ").last
@@ -59,15 +60,16 @@ class Api
             formatted_date = "#{date[1]}/#{day_value}/#{date[0]}"
 
           
-
+            #make visitor and home team reference existing team objects
             games_hash[key_date] = {
                "date" => formatted_date,
-               "home_team" => i["home_team"]["full_name"],
+               "home_team" => i["home_team"]["full_name"],   #Team.find_by_name(i["home_team"]["full_name"])
                "visitor_team" => i["visitor_team"]["full_name"],
                "home_team_score" => i["home_team_score"],
                "visitor_team_score" => i["visitor_team_score"]
             }
           
+            Game.new(games_hash[key_date])
 
          end
          page += 1 
