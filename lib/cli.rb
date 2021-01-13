@@ -80,7 +80,6 @@ class Cli
     end
 
     def what_next
-        binding.pry
         puts "What would you like to do next?"
         puts "1) See data for a different season"
         puts "2) Select a different team"
