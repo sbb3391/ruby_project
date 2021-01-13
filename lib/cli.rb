@@ -2,9 +2,12 @@ require 'pry'
 
 class Cli 
 
-    attr_accessor :user, :counter, :index, :team_selection, :team_nick_name, :year, :input3, :input4
+    attr_accessor :user, :counter, :index, :team_selection, :team_full_name, :team_nick_name, :year, :input3, :input4
     
     
+    def space
+        puts ""
+    end
     
     def start
         system("clear")
@@ -16,11 +19,6 @@ class Cli
         menu
     end
     
-   
-    
-    def space
-        puts ""
-    end
     
     def menu
         team_select
@@ -39,9 +37,9 @@ class Cli
 
         case input
         when "1"
-            get_record
+            display_record
         when "2"
-            get_games
+            display_game_results
         else 
             puts "That is an incorrect response. Please try again"
             games_or_record
@@ -105,42 +103,7 @@ class Cli
             puts "sorry please input a selection between 1 and 3"
             what_next
         end
-    end
-
-    def select_team
-        puts "Select the team number..."
-            space
-        @team_selection = gets.strip.to_i 
-            space
-        #take input and use it in Api.team_information method
-        Api.team_information(@team_selection)
-            space
-
-    end
-            
-            
-    
-    def game_info
-
-        page = 1
-
-        puts "--- What season are you interested in? ---"
-            space
-        @year = gets.strip
-            space
-        Api.game_information_by_season(@team_selection, @year)
-            space
-        puts "Would you like to see 10 more game results? (y/n)"
-            space
-        input3 = gets.strip.downcase
-            case input3
-            when "y"
-                page += 1 
-                Api.game_information_by_season(@team_selection, @year, page)
-            when "n"
-                puts "Thank you for using your trusted NBA resource. Have a great day!"
-            end
-    end
+    end     
 
     def get_year
         puts "What season are you interested in? Please select a season between 1970 and 2019"
@@ -158,51 +121,121 @@ class Cli
         games_or_record
     end
 
-    def get_record
+    def display_record
         space
-            year = @year
-            input = @team_selection
-            index = @index
-            team_full_name = Team.all[index].full_name
-            x = Api.new(input, team_full_name)
-            x.team_record(year, input)
-            sleep(3)
-            space
-            space
-            puts "type 'y' if you would like to get #{team_full_name} game results for the #{year}-#{year.to_i + 1} season. Otherwise press enter."
-            space
-            x = gets.strip.downcase
+        year = @year
+        input = @team_selection
+        index = @index
+        @team_full_name = Team.all[index].full_name
+        team_record(year, input)
+        sleep(3)
+        space
+        space
+        puts "type 'y' if you would like to get #{team_full_name} game results for the #{year}-#{year.to_i + 1} season. Otherwise press enter."
+        space
+        x = gets.strip.downcase
 
-            if x == "y"
-                get_games
-            else
-                what_next
-            end
+        if x == "y"
+            display_game_results
+        else
+            what_next
         end
+    end
 
-        def get_games
-            space
-            year = @year
-            input = @team_selection
-            index = @index
-            team_full_name = Team.all[index].full_name
-            puts "Please wait while we get this data..."
-            space
-            x = Api.new(input, team_full_name)
-            x.game_info(year, input)
-            space
-            sleep(1)
-            puts "type 'y' if you would like to see the record for the #{team_full_name} for the #{year}-#{year.to_i + 1} season. Otherwise press enter."
-            space
-            x = gets.strip.downcase
+    def display_game_results
+        space
+        year = @year
+        input = @team_selection
+        index = @index
+        @team_full_name = Team.all[index].full_name
+        puts "Please wait while we get this data..."
+        space
+        game_results(year, input)
+        space
+        sleep(1)
+        puts "type 'y' if you would like to see the record for the #{team_full_name} for the #{year}-#{year.to_i + 1} season. Otherwise press enter."
+        space
+        x = gets.strip.downcase
 
-            if x == "y"
-                get_record
-            else
-                what_next
-            end
+        if x == "y"
+            display_record
+        else
+            what_next
+        end
+    end
+
+    def game_results(year, input)
+        #call API to get game results, populate Game.all with the results
+        Api.new.get_games(year, input)
+
+        #Look through array of all games (Game.all), get results for only the season being referenced
+        games_in_season = Game.all.select {|i| i.season == @year}
+        games_in_season_sorted = games_in_season.sort_by! {|i| i.date_year_first}
+        
+    
+        #determine if the team did not exist during the given year
+        if Game.all == []
+            puts "The #{@team_full_name} did not play any games in the #{year} season."
         end
     
+        counter = 0
+        games_in_season_sorted.each do |i|
+            counter += 1
+            if i.home_team.full_name == @team_full_name && i.home_team_score > i.visitor_team_score
+                puts "#{i.date} -- #{i.visitor_team.full_name}: #{@team_nick_name} win #{i.home_team_score} to #{i.visitor_team_score}.".green
+                sleep(0.2)
+            elsif i.home_team.full_name == @team_full_name && i.home_team_score < i.visitor_team_score
+                puts "#{i.date} -- #{i.visitor_team.full_name}: #{@team_nick_name} lose #{i.visitor_team_score} to #{i.home_team_score}.".colorize(:red)
+                sleep(0.2)
+            elsif i.visitor_team.full_name == @team_full_name && i.home_team_score > i.visitor_team_score
+                puts "#{i.date} -- at #{i.home_team.full_name}: #{@team_nick_name} lose #{i.home_team_score} to #{i.visitor_team_score}.".colorize(:red)
+                sleep(0.2)
+            elsif i.visitor_team.full_name == @team_full_name && i.home_team_score < i.visitor_team_score
+                puts "#{i.date} -- at #{i.home_team.full_name}: #{@team_nick_name} win #{i.visitor_team_score} to #{i.home_team_score}.".colorize(:green)
+                sleep(0.2)
+            end
+            
+            if counter % 20 == 0
+                puts "Type 'n' if you do not want to see more games. Otherwise press 'Enter'"
+                input = gets.chomp 
+    
+                if input == "n"
+                break
+                end
+    
+            end
+    
+        end
+    end
+
+    def team_record(year, input)
+        #call API to get game results, populate Game.all with the results
+        Api.new.get_games(year, input)
+
+        #Look through array of all games (Game.all), get results for only the season being referenced
+        games_in_season = Game.all.select {|i| i.season == @year}
+
+
+        wins = 0
+        losses = 0
+
+        if Game.all == []
+           puts "The #{@chosen_team_full_name} did not play any games in the #{@year}-#{@year.to_i + 1} season."
+           what_next
+        end
+  
+        games_in_season.each do |i|
+            
+            if i.winning_team == @team_full_name
+                wins += 1
+            else
+                losses += 1
+            end
+        end
+     
+        puts "In #{@year} the #{@chosen_team_nickname} had a record of #{wins} wins and #{losses} losses."
+    end
+
 end
     
 

@@ -24,18 +24,6 @@ class Api
       end   
    end
 
-   #Use list of NBA teams from API call to create terminal output that shows the user the team they selected
-   def team_information(input)
-      index = input - 1
-      url = 'https://www.balldontlie.io/api/v1/teams'
-      binding.pry
-      response = self.call_api(url)["data"][index]
-      @chosen_team_full_name = response["full_name"]
-      @chosen_team_nickname = @chosen_team_fullname.split(" ").last
-
-      # puts "You've selected the #{response["full_name"]}, from the #{response["division"]} Division of the #{response["conference"]}ern Conference."
-   end
-
    #Make API call to create a hash of all games played by one team in one year (both year and team chosen by the user)
    #returns the hash
    def get_games(year, input)
@@ -55,98 +43,37 @@ class Api
 
             #change formatting of date
             date = i["date"].split("-")
-            day_value = date[2].split(/T/).shift
+            day_value = date[2].split(/T/)[0]
             key_date = "#{date[0]}/#{date[1]}/#{day_value}"
             formatted_date = "#{date[1]}/#{day_value}/#{date[0]}"
-
+            
+            #determine winning team
+            if i["home_team_score"] > i["visitor_team_score"]
+               winner = i["home_team"]["full_name"]
+            else
+               winner = i["visitor_team"]["full_name"]
+            end
           
             #make visitor and home team reference existing team objects
             games_hash[key_date] = {
+               "season" => year,
                "date" => formatted_date,
-               "home_team" => i["home_team"]["full_name"],   #Team.find_by_name(i["home_team"]["full_name"])
-               "visitor_team" => i["visitor_team"]["full_name"],
+               "home_team" => Team.find_by_name(i["home_team"]["full_name"]),
+               "visitor_team" => Team.find_by_name(i["visitor_team"]["full_name"]),
                "home_team_score" => i["home_team_score"],
-               "visitor_team_score" => i["visitor_team_score"]
+               "visitor_team_score" => i["visitor_team_score"],
+               "winning_team" => winner,
+               "date_year_first" => key_date
             }
           
-            Game.new(games_hash[key_date])
+            Game.new(games_hash[key_date].sort.to_h)
 
          end
          page += 1 
       end
       games_hash
    end
-
-   #Use get_games method to create terminal output showing the results of every game played by one team during one season
-   def game_info(year, input)
-      x = get_games(year, input).sort.to_h
-
-      #determine if the team did not exist during the given year
-      if x == {}
-         puts "The #{self.chosen_team_full_name} did not play any games in #{year}."
-      end
-
-      if self.chosen_team_full_name != nil
-         self.chosen_team_nickname = self.chosen_team_full_name.split(" ").last
-      end
-
-      counter = 0
-      x.each do |key, value|
-         counter += 1
-         if value["home_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
-            puts "#{value["date"]} -- #{value["visitor_team"]}: #{self.chosen_team_nickname} win #{value["home_team_score"]} to #{value["visitor_team_score"]}.".green
-            sleep(0.2)
-         elsif value["home_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
-            puts "#{value["date"]} -- #{value["visitor_team"]}: #{self.chosen_team_nickname} lose #{value["visitor_team_score"]} to #{value["home_team_score"]}.".colorize(:red)
-            sleep(0.2)
-         elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
-            puts "#{value["date"]} -- @#{value["home_team"]}: #{self.chosen_team_nickname} lose  #{value["home_team_score"]} to #{value["visitor_team_score"]}.".colorize(:red)
-            sleep(0.2)
-         elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
-            puts "#{value["date"]} -- @#{value["home_team"]}: #{self.chosen_team_nickname} win #{value["visitor_team_score"]} to #{value["home_team_score"]}.".colorize(:green)
-            sleep(0.2)
-         end
-         
-         if counter % 20 == 0
-            puts "Type 'n' if you do not want to see more games. Otherwise press 'Enter'"
-            input = gets.chomp 
-
-            if input == "n"
-               break
-            end
-
-         end
-
-      end
-   end
-
-   def team_record(year, input)
-      x = get_games(year, input).sort.to_h
-
-      if x == {}
-         puts "The #{self.chosen_team_full_name} did not play any games in the #{year}-#{year.to_i + 1} season."
-      else  
-
-         x.each do |key, value|
-            
-            if value["home_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
-               @wins += 1
-            elsif value["home_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
-               @losses += 1
-            elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] > value["visitor_team_score"]
-               @losses += 1
-            elsif value["visitor_team"] == @chosen_team_full_name && value["home_team_score"] < value["visitor_team_score"]
-               @wins += 1
-            end
-         end
    
-         if self.chosen_team_full_name != nil
-            self.chosen_team_nickname = self.chosen_team_full_name.split(" ").last
-         end
-         puts "In #{year} the #{self.chosen_team_nickname} had a record of #{wins} wins and #{losses} losses."
-      end
-   end
-
 end
 
 
