@@ -2,10 +2,11 @@ class Game
 
     #visitor team and home team are going to be actual instances of the team class
 
-    attr_accessor :season, :date, :date_year_first, :home_team, :visitor_team, :home_team_score, :visitor_team_score, :winning_team
+    attr_accessor :game_id, :season, :date, :date_year_first, :home_team, :visitor_team, :home_team_score, :visitor_team_score, :winning_team
     @@all = []
 
-    def initialize(hash)  
+    def initialize(hash)
+        @game_id = hash["game_id"]  
         @season = hash["season"]
         @date = hash["date"]
         @home_team = hash["home_team"]
