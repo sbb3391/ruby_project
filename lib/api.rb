@@ -73,7 +73,7 @@ class Api
       end
       games_hash
    end
-   
+
 end
 
 

@@ -80,6 +80,7 @@ class Cli
     end
 
     def what_next
+        binding.pry
         puts "What would you like to do next?"
         puts "1) See data for a different season"
         puts "2) Select a different team"
@@ -233,7 +234,7 @@ class Cli
             end
         end
      
-        puts "In #{@year} the #{@chosen_team_nickname} had a record of #{wins} wins and #{losses} losses."
+        puts "In #{@year} the #{@team_nick_name} had a record of #{wins} wins and #{losses} losses."
     end
 
 end
